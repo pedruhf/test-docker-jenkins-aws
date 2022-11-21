@@ -14,8 +14,9 @@ pipeline {
       steps {
         script {
           echo "Incrementing the app version..."
-          def matcher = readFile("package.json") =~ "version"
-          echo "${matcher}"
+          def packageJSON = readJSON file: "package.json"
+          def appVersion = packageJSON.version
+          echo "APP VERSION: ${appVersion}"
         }
       }
     }
