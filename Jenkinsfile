@@ -1,6 +1,14 @@
 pipeline {
   agent any
 
+  tools {
+    nodejs "my-nodejs"
+  }
+
+  environment {
+    IMAGE_NAME = "pedruhf/dinheirow-test:1.0"
+  }
+
   stages {
     stage("test") {
       steps {
@@ -10,10 +18,15 @@ pipeline {
       }
     }
 
-    stage("build") {
+    stage("build image") {
       steps {
         script {
-          echo "Building the app..."
+          echo "Building the docker image..."
+          withCredentials([usernamePassword(credentialsId: "docker-hub", passwordVariable: "PASS", usernameVariable: "USER")]) {
+            sh "docker build -t pedruhf/dinheirow-test:1.0 ."
+            sh "echo $PASS | docker login -u $USER --password-stdin"
+            sh "docker push pedruhf/dinheirow-test:1.0"
+          }
         }
       }
     }
@@ -21,9 +34,10 @@ pipeline {
     stage("deploy") {
       steps {
         script {
-          def dockerCmd = "docker run -p 3000:3000 -d pedruhf/dinheirow-test:1.0"
-          sshagent(['ec2-server-key']) {
-            sh "ssh -o StrictHostKeyChecking=no ec2-user@18.234.60.100 ${dockerCmd}"
+          echo "Deploying docker image in AWS EC2..."
+          // def dockerCmd = "docker run -p 3000:3000 -d ${IMAGE_NAME}"
+          // sshagent(['ec2-server-key']) {
+          //   sh "ssh -o StrictHostKeyChecking=no ec2-user@18.234.60.100 ${dockerCmd}"
           }
         }
       }
