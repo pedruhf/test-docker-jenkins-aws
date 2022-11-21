@@ -14,9 +14,9 @@ pipeline {
       steps {
         script {
           echo "Incrementing the app version..."
-          def packageJSON = readJSON file: "package.json"
+          def packageJSON = readJSON file: "./package.json"
           def appVersion = packageJSON.version
-          echo "APP VERSION: ${appVersion}"
+          echo "APP PACKAGE: ${packageJSON}"
         }
       }
     }
