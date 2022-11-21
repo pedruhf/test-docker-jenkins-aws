@@ -37,6 +37,7 @@ pipeline {
           def dockerCmd = "docker run -p 3000:3000 -d pedruhf/dinheirow-test:${IMAGE_NAME}"
           sshagent(['ec2-server-key']) {
             sh "ssh -o StrictHostKeyChecking=no ec2-user@18.234.60.100 ${dockerCmd}"
+          }
         }
       }
     }
