@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   app:
-    build: .
+    image: pedruhf/dinheirow-test
     ports:
       - 3000:3000
   
