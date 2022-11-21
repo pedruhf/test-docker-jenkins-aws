@@ -2,7 +2,7 @@ pipeline {
   agent any
 
   tools {
-    nodejs "my-nodejs"
+    node "my-nodejs"
   }
 
   environment {
@@ -10,26 +10,28 @@ pipeline {
   }
 
   stages {
-    stage("test") {
+    stage("increment version") {
       steps {
         script {
-          echo "Testing the app..."
+          echo "Incrementing the app version..."
+          def matcher = readFile("package.json") =~ "version"
+          echo "${matcher}"
         }
       }
     }
 
-    stage("build image") {
-      steps {
-        script {
-          echo "Building the docker image..."
-          withCredentials([usernamePassword(credentialsId: "docker-hub", passwordVariable: "PASS", usernameVariable: "USER")]) {
-            sh "docker build -t pedruhf/dinheirow-test:1.0 ."
-            sh "echo $PASS | docker login -u $USER --password-stdin"
-            sh "docker push pedruhf/dinheirow-test:1.0"
-          }
-        }
-      }
-    }
+    // stage("build image") {
+    //   steps {
+    //     script {
+    //       echo "Building the docker image..."
+    //       withCredentials([usernamePassword(credentialsId: "docker-hub", passwordVariable: "PASS", usernameVariable: "USER")]) {
+    //         sh "docker build -t pedruhf/dinheirow-test:1.0 ."
+    //         sh "echo $PASS | docker login -u $USER --password-stdin"
+    //         sh "docker push pedruhf/dinheirow-test:1.0"
+    //       }
+    //     }
+    //   }
+    // }
 
     stage("deploy") {
       steps {
