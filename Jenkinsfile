@@ -12,7 +12,8 @@ pipeline {
           echo "Incrementing the app version..."
           def packageJSON = readJSON file: "./package.json"
           def appVersion = packageJSON.version
-          env.IMAGE_NAME = "$appVersion-$BUILD_NUMBER"
+          def imageVersion = "$appVersion-$BUILD_NUMBER"
+          env.IMAGE_NAME = "pedruhf/dinheirow-test:${imageVersion}"
         }
       }
     }
@@ -22,9 +23,9 @@ pipeline {
         script {
           echo "Building the docker image..."
           withCredentials([usernamePassword(credentialsId: "docker-hub", passwordVariable: "PASS", usernameVariable: "USER")]) {
-            sh "docker build -t pedruhf/dinheirow-test:${IMAGE_NAME} ."
+            sh "docker build -t ${IMAGE_NAME} ."
             sh "echo $PASS | docker login -u $USER --password-stdin"
-            sh "docker push pedruhf/dinheirow-test:${IMAGE_NAME}"
+            sh "docker push ${IMAGE_NAME}"
           }
         }
       }
@@ -34,10 +35,13 @@ pipeline {
       steps {
         script {
           echo "Deploying docker image in AWS EC2..."
-          def dockerComposeCmd = "docker-compose -f docker-compose.yaml up --detach"
+
+          def shellCmd = "bash ./server-cmds.sh ${IMAGE_NAME}"
+
           sshagent(['ec2-server-key']) {
+            sh "scp server-cmds.sh ec2-user@18.234.60.100:/home/ec2-user"
             sh "scp docker-compose.yaml ec2-user@18.234.60.100:/home/ec2-user"
-            sh "ssh -o StrictHostKeyChecking=no ec2-user@18.234.60.100 ${dockerComposeCmd}"
+            sh "ssh -o StrictHostKeyChecking=no ec2-user@18.234.60.100 ${shellCmd}"
           }
         }
       }

@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   app:
-    image: pedruhf/dinheirow-test:1.0.2-22
+    image: ${IMAGE}
     ports:
       - 3000:3000
   
